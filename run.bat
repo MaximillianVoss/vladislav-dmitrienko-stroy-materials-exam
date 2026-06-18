@@ -23,4 +23,4 @@ if errorlevel 1 (
     exit /b 1
 )
 
-dotnet run --project "src\StroyMaterials.App\StroyMaterials.App.csproj"
+dotnet run --project "StroyMaterials.App\StroyMaterials.App.csproj"

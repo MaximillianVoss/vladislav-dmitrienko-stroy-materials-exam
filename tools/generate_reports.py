@@ -23,7 +23,7 @@ from reportlab.platypus import Image, PageBreak, Paragraph, SimpleDocTemplate, S
 
 
 ROOT = Path(__file__).resolve().parents[1]
-APP_DIR = ROOT / "src" / "StroyMaterials.App"
+APP_DIR = ROOT / "StroyMaterials.App"
 DOCS_DIR = ROOT / "docs"
 SCREENSHOTS_DIR = DOCS_DIR / "screenshots"
 BACKUPS_DIR = DOCS_DIR / "backups"
@@ -214,7 +214,7 @@ def backup_and_stats() -> tuple[Path, dict, list[tuple[str, int, int]]]:
         page_size = conn.execute("PRAGMA page_size").fetchone()[0]
         page_count = conn.execute("PRAGMA page_count").fetchone()[0]
         stats = {
-            "db_path": "src/StroyMaterials.App/Data/stroymaterials.db",
+            "db_path": "StroyMaterials.App/Data/stroymaterials.db",
             "size_bytes": DB_PATH.stat().st_size,
             "page_size": page_size,
             "page_count": page_count,
@@ -306,7 +306,7 @@ def build_backup_monitoring_screenshots(
         "Резервное копирование базы данных",
         [
             "Операция: копирование SQLite-файла базы данных в резервную копию формата .bak",
-            f"Источник: src/StroyMaterials.App/Data/stroymaterials.db",
+            f"Источник: StroyMaterials.App/Data/stroymaterials.db",
             f"Результат: docs/backups/{backup_path.name}",
             "Статус: резервная копия успешно создана",
         ],

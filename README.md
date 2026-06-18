@@ -16,7 +16,7 @@
 `run.bat` сначала пробует открыть готовую публикацию из `publish/win-x64`. Для готового exe нужен .NET 8 Windows Desktop Runtime. Если публикации нет, скрипт запускает проект командой:
 
 ```powershell
-dotnet run --project src/StroyMaterials.App/StroyMaterials.App.csproj
+dotnet run --project StroyMaterials.App/StroyMaterials.App.csproj
 ```
 
 Для запуска из исходников нужен .NET 8 SDK или новее.
@@ -36,14 +36,14 @@ dotnet run --project src/StroyMaterials.App/StroyMaterials.App.csproj
 Основная БД находится в файле:
 
 ```text
-src/StroyMaterials.App/Data/stroymaterials.db
+StroyMaterials.App/Data/stroymaterials.db
 ```
 
 При сборке файл копируется рядом с приложением. Если БД в папке запуска отсутствует, приложение создает ее из SQL-скриптов:
 
 ```text
-src/StroyMaterials.App/Database/create_schema.sql
-src/StroyMaterials.App/Database/seed_data.sql
+StroyMaterials.App/Database/create_schema.sql
+StroyMaterials.App/Database/seed_data.sql
 ```
 
 Для возврата к исходному состоянию можно запустить `reset_database.bat`.
