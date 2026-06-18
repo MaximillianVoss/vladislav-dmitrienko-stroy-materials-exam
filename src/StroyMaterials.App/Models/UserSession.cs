@@ -1,6 +1,6 @@
 namespace StroyMaterials.App.Models;
 
-internal sealed class UserSession
+public sealed class UserSession
 {
     public static UserSession Guest { get; } = new()
     {

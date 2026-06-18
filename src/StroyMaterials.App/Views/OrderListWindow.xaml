@@ -1,0 +1,81 @@
+<Window x:Class="StroyMaterials.App.Views.OrderListWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ООО &quot;СтройМатериалы&quot; - заказы"
+        Width="1120"
+        Height="660"
+        MinWidth="960"
+        MinHeight="560"
+        Icon="{DynamicResource AppIcon}">
+    <Grid Background="{StaticResource MainBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="68" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SecondaryBrush}">
+            <Grid Margin="14,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="96" />
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Text="Заказы"
+                           VerticalAlignment="Center"
+                           FontSize="24"
+                           FontWeight="Bold" />
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="AddOrderButton"
+                            Content="Добавить"
+                            Style="{StaticResource AccentButton}"
+                            Margin="0,0,8,0"
+                            Click="AddOrderButton_Click" />
+                    <Button x:Name="EditOrderButton"
+                            Content="Редактировать"
+                            Style="{StaticResource AccentButton}"
+                            Margin="0,0,8,0"
+                            Click="EditOrderButton_Click" />
+                    <Button x:Name="DeleteOrderButton"
+                            Content="Удалить"
+                            Style="{StaticResource AccentButton}"
+                            Click="DeleteOrderButton_Click" />
+                </StackPanel>
+
+                <Button Grid.Column="2"
+                        Content="Назад"
+                        Style="{StaticResource SecondaryButton}"
+                        Margin="12,8,0,8"
+                        Click="BackButton_Click" />
+            </Grid>
+        </Border>
+
+        <DataGrid x:Name="OrdersGrid"
+                  Grid.Row="1"
+                  Margin="14"
+                  MouseDoubleClick="OrdersGrid_MouseDoubleClick">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Номер" Binding="{Binding Id}" Width="70" />
+                <DataGridTextColumn Header="Артикулы" Binding="{Binding ItemsText}" Width="210" />
+                <DataGridTextColumn Header="Статус" Binding="{Binding StatusName}" Width="110" />
+                <DataGridTextColumn Header="Пункт выдачи" Binding="{Binding PickupPointAddress}" Width="2*" />
+                <DataGridTextColumn Header="Дата заказа" Binding="{Binding OrderDate, StringFormat=dd.MM.yyyy}" Width="110" />
+                <DataGridTextColumn Header="Дата выдачи" Binding="{Binding DeliveryDate, StringFormat=dd.MM.yyyy}" Width="110" />
+                <DataGridTextColumn Header="Клиент" Binding="{Binding CustomerName}" Width="180" />
+                <DataGridTextColumn Header="Код" Binding="{Binding ReceiveCode}" Width="70" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Border Grid.Row="2"
+                Background="{StaticResource MutedBrush}"
+                BorderBrush="{StaticResource BorderBrushSoft}"
+                BorderThickness="0,1,0,0">
+            <TextBlock x:Name="CountTextBlock"
+                       VerticalAlignment="Center"
+                       Margin="14,0"
+                       Foreground="{StaticResource SubtleTextBrush}" />
+        </Border>
+    </Grid>
+</Window>

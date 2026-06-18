@@ -1,6 +1,6 @@
 namespace StroyMaterials.App.Models;
 
-internal sealed class LookupItem
+public sealed class LookupItem
 {
     public int Id { get; init; }
 

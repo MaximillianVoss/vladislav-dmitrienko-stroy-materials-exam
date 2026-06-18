@@ -1,6 +1,6 @@
 namespace StroyMaterials.App.Models;
 
-internal sealed class ProductRecord
+public sealed class ProductRecord
 {
     public string Article { get; set; } = "";
 

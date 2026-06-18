@@ -1,0 +1,194 @@
+<Window x:Class="StroyMaterials.App.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="ООО &quot;СтройМатериалы&quot; - товары"
+        Width="1240"
+        Height="760"
+        MinWidth="1080"
+        MinHeight="640"
+        Icon="{DynamicResource AppIcon}">
+    <Window.Resources>
+        <Style TargetType="{x:Type DataGridRow}">
+            <Setter Property="Background" Value="{Binding RowBackground}" />
+            <Setter Property="MinHeight" Value="74" />
+            <Setter Property="SnapsToDevicePixels" Value="True" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="{StaticResource MainBrush}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="76" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Background="{StaticResource SecondaryBrush}">
+            <Grid Margin="14,8">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="58" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="220" />
+                    <ColumnDefinition Width="96" />
+                </Grid.ColumnDefinitions>
+
+                <Image x:Name="LogoImage"
+                       Width="50"
+                       Height="50"
+                       Stretch="Uniform" />
+
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Margin="12,0,12,0">
+                    <TextBlock Text="Список товаров"
+                               FontSize="24"
+                               FontWeight="Bold" />
+                    <TextBlock Text="ООО &quot;СтройМатериалы&quot;"
+                               FontSize="14"
+                               Foreground="#3F3321" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="2"
+                            Orientation="Horizontal"
+                            VerticalAlignment="Center"
+                            Margin="0,0,12,0">
+                    <Button x:Name="AddProductButton"
+                            Content="Добавить"
+                            Style="{StaticResource AccentButton}"
+                            Margin="0,0,8,0"
+                            Click="AddProductButton_Click" />
+                    <Button x:Name="EditProductButton"
+                            Content="Редактировать"
+                            Style="{StaticResource AccentButton}"
+                            Margin="0,0,8,0"
+                            Click="EditProductButton_Click" />
+                    <Button x:Name="DeleteProductButton"
+                            Content="Удалить"
+                            Style="{StaticResource AccentButton}"
+                            Margin="0,0,8,0"
+                            Click="DeleteProductButton_Click" />
+                    <Button x:Name="OrdersButton"
+                            Content="Заказы"
+                            Style="{StaticResource AccentButton}"
+                            Click="OrdersButton_Click" />
+                </StackPanel>
+
+                <TextBlock x:Name="UserTextBlock"
+                           Grid.Column="3"
+                           VerticalAlignment="Center"
+                           TextAlignment="Right"
+                           FontWeight="SemiBold"
+                           TextTrimming="CharacterEllipsis" />
+
+                <Button Grid.Column="4"
+                        Content="Выход"
+                        Style="{StaticResource SecondaryButton}"
+                        Margin="12,8,0,8"
+                        Click="ExitButton_Click" />
+            </Grid>
+        </Border>
+
+        <Border x:Name="FiltersPanel"
+                Grid.Row="1"
+                Background="{StaticResource MutedBrush}"
+                BorderBrush="{StaticResource BorderBrushSoft}"
+                BorderThickness="0,0,0,1"
+                Padding="14,10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="76" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="118" />
+                    <ColumnDefinition Width="260" />
+                    <ColumnDefinition Width="96" />
+                    <ColumnDefinition Width="230" />
+                </Grid.ColumnDefinitions>
+
+                <Label Content="Поиск" FontWeight="SemiBold" />
+                <TextBox x:Name="SearchTextBox"
+                         Grid.Column="1"
+                         Margin="0,0,16,0"
+                         TextChanged="FilterControl_Changed"
+                         ToolTip="Поиск по артикулу, названию, описанию, категории, поставщику, производителю и единице измерения" />
+
+                <Label Grid.Column="2" Content="Производитель" FontWeight="SemiBold" />
+                <ComboBox x:Name="ManufacturerComboBox"
+                          Grid.Column="3"
+                          Margin="0,0,16,0"
+                          DisplayMemberPath="Name"
+                          SelectedValuePath="Id"
+                          SelectionChanged="FilterControl_Changed" />
+
+                <Label Grid.Column="4" Content="Сортировка" FontWeight="SemiBold" />
+                <ComboBox x:Name="SortComboBox"
+                          Grid.Column="5"
+                          DisplayMemberPath="Name"
+                          SelectedValuePath="Key"
+                          SelectionChanged="FilterControl_Changed" />
+            </Grid>
+        </Border>
+
+        <DataGrid x:Name="ProductsGrid"
+                  Grid.Row="2"
+                  Margin="14"
+                  MouseDoubleClick="ProductsGrid_MouseDoubleClick">
+            <DataGrid.Columns>
+                <DataGridTemplateColumn Header="Фото" Width="78">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border Width="62"
+                                    Height="50"
+                                    Background="White"
+                                    BorderBrush="{StaticResource BorderBrushSoft}"
+                                    BorderThickness="1"
+                                    CornerRadius="4"
+                                    HorizontalAlignment="Center">
+                                <Image Source="{Binding Image}"
+                                       Stretch="Uniform"
+                                       Margin="3" />
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Артикул" Binding="{Binding Article}" Width="88" />
+                <DataGridTextColumn Header="Наименование" Binding="{Binding Name}" Width="145" />
+                <DataGridTextColumn Header="Категория" Binding="{Binding CategoryName}" Width="150" />
+                <DataGridTextColumn Header="Описание" Binding="{Binding Description}" Width="2*" />
+                <DataGridTextColumn Header="Производитель" Binding="{Binding ManufacturerName}" Width="125" />
+                <DataGridTextColumn Header="Поставщик" Binding="{Binding SupplierName}" Width="120" />
+                <DataGridTemplateColumn Header="Цена" Width="82">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding PriceText}" VerticalAlignment="Center">
+                                <TextBlock.Style>
+                                    <Style TargetType="{x:Type TextBlock}">
+                                        <Setter Property="Foreground" Value="{StaticResource TextBrush}" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding HasDiscount}" Value="True">
+                                                <Setter Property="Foreground" Value="{StaticResource DangerBrush}" />
+                                                <Setter Property="TextDecorations" Value="Strikethrough" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+                <DataGridTextColumn Header="Итог" Binding="{Binding FinalPriceText}" Width="82" />
+                <DataGridTextColumn Header="Ед." Binding="{Binding UnitName}" Width="56" />
+                <DataGridTextColumn Header="Остаток" Binding="{Binding StockQuantity}" Width="74" />
+                <DataGridTextColumn Header="Скидка" Binding="{Binding DiscountText}" Width="70" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <Border Grid.Row="3"
+                Background="{StaticResource MutedBrush}"
+                BorderBrush="{StaticResource BorderBrushSoft}"
+                BorderThickness="0,1,0,0">
+            <TextBlock x:Name="CountTextBlock"
+                       VerticalAlignment="Center"
+                       Margin="14,0"
+                       Foreground="{StaticResource SubtleTextBrush}" />
+        </Border>
+    </Grid>
+</Window>

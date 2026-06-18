@@ -1,6 +1,6 @@
 namespace StroyMaterials.App.Models;
 
-internal sealed class OrderRecord
+public sealed class OrderRecord
 {
     public int Id { get; set; }
 

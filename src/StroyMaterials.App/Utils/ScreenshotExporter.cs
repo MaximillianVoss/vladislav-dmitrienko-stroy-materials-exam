@@ -1,4 +1,8 @@
+using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using StroyMaterials.App.Models;
+using StroyMaterials.App.Views;
 
 namespace StroyMaterials.App;
 
@@ -8,15 +12,15 @@ internal static class ScreenshotExporter
     {
         Directory.CreateDirectory(outputDirectory);
 
-        Capture(new LoginForm(), Path.Combine(outputDirectory, "01_login.png"));
-        Capture(new MainForm(UserSession.Guest), Path.Combine(outputDirectory, "02_guest_products.png"));
-        Capture(new MainForm(new UserSession
+        Capture(new LoginWindow(), Path.Combine(outputDirectory, "01_login.png"));
+        Capture(new MainWindow(UserSession.Guest), Path.Combine(outputDirectory, "02_guest_products.png"));
+        Capture(new MainWindow(new UserSession
         {
             UserId = 1,
             FullName = "Ворсин Петр Евгеньевич",
             RoleName = "Администратор"
         }), Path.Combine(outputDirectory, "03_admin_products.png"));
-        Capture(new OrderListForm(new UserSession
+        Capture(new OrderListWindow(new UserSession
         {
             UserId = 1,
             FullName = "Ворсин Петр Евгеньевич",
@@ -24,21 +28,26 @@ internal static class ScreenshotExporter
         }), Path.Combine(outputDirectory, "04_orders.png"));
     }
 
-    private static void Capture(Form form, string path)
+    private static void Capture(Window window, string path)
     {
-        using (form)
-        {
-            form.StartPosition = FormStartPosition.Manual;
-            form.Location = new Point(-32000, -32000);
-            form.ShowInTaskbar = false;
-            form.Show();
-            form.Refresh();
-            Application.DoEvents();
+        window.WindowStartupLocation = WindowStartupLocation.Manual;
+        window.Left = -32000;
+        window.Top = -32000;
+        window.ShowInTaskbar = false;
+        window.Show();
+        window.UpdateLayout();
+        window.Dispatcher.Invoke(() => { }, System.Windows.Threading.DispatcherPriority.ApplicationIdle);
 
-            using var bitmap = new Bitmap(form.Width, form.Height);
-            form.DrawToBitmap(bitmap, new Rectangle(Point.Empty, form.Size));
-            bitmap.Save(path, System.Drawing.Imaging.ImageFormat.Png);
-            form.Close();
-        }
+        var width = Math.Max(1, (int)Math.Ceiling(window.ActualWidth));
+        var height = Math.Max(1, (int)Math.Ceiling(window.ActualHeight));
+        var bitmap = new RenderTargetBitmap(width, height, 96, 96, PixelFormats.Pbgra32);
+        bitmap.Render(window);
+
+        var encoder = new PngBitmapEncoder();
+        encoder.Frames.Add(BitmapFrame.Create(bitmap));
+        using var stream = File.Create(path);
+        encoder.Save(stream);
+
+        window.Close();
     }
 }
