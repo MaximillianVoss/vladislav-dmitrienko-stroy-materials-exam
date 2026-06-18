@@ -1,6 +1,8 @@
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using StroyMaterials.App.Models;
+using StroyMaterials.App.UI;
 
 namespace StroyMaterials.App.Views;
 
@@ -10,6 +12,9 @@ public partial class LoginWindow : Window
     {
         InitializeComponent();
         LogoImage.Source = ImageTools.LoadLogo(128);
+#if DEBUG
+        LoadDebugAccounts();
+#endif
         LoginTextBox.Focus();
     }
 
@@ -49,6 +54,36 @@ public partial class LoginWindow : Window
         }
 
         OpenMainWindow(session);
+    }
+
+#if DEBUG
+    private void LoadDebugAccounts()
+    {
+        var accounts = Database.GetDebugLoginAccounts();
+        if (accounts.Count == 0)
+        {
+            return;
+        }
+
+        DebugAccountsList.ItemsSource = accounts;
+        DebugAccountsPanel.Visibility = Visibility.Visible;
+        Width = 1080;
+        Height = 820;
+        MinHeight = 760;
+    }
+
+#endif
+
+    private void DebugAccountButton_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: DebugLoginAccountView account })
+        {
+            return;
+        }
+
+        LoginTextBox.Text = account.Login;
+        PasswordBox.Password = account.Password;
+        Login();
     }
 
     private void OpenMainWindow(UserSession session)

@@ -1,5 +1,6 @@
 using Microsoft.Data.Sqlite;
 using StroyMaterials.App.Models;
+using StroyMaterials.App.UI;
 
 namespace StroyMaterials.App;
 
@@ -31,6 +32,35 @@ internal static class Database
             RoleName = reader.GetString(2)
         };
     }
+
+#if DEBUG
+    public static List<DebugLoginAccountView> GetDebugLoginAccounts()
+    {
+        using var connection = OpenConnection();
+        using var command = connection.CreateCommand();
+        command.CommandText = """
+            SELECT roles.name, users.full_name, users.login, users.password
+            FROM users
+            JOIN roles ON roles.id = users.role_id
+            ORDER BY roles.name, users.full_name, users.login;
+            """;
+
+        var accounts = new List<DebugLoginAccountView>();
+        using var reader = command.ExecuteReader();
+        while (reader.Read())
+        {
+            accounts.Add(new DebugLoginAccountView
+            {
+                RoleName = reader.GetString(0),
+                FullName = reader.GetString(1),
+                Login = reader.GetString(2),
+                Password = reader.GetString(3)
+            });
+        }
+
+        return accounts;
+    }
+#endif
 
     public static List<ProductRecord> GetProducts(string search, int? manufacturerId, string sortKey)
     {
