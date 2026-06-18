@@ -90,6 +90,11 @@
                             Margin="0,10,0,0"
                             Click="GuestButton_Click" />
 
+                    <Button Content="Зарегистрироваться"
+                            Style="{StaticResource SecondaryButton}"
+                            Margin="0,10,0,0"
+                            Click="RegisterButton_Click" />
+
                     <Border x:Name="DebugAccountsPanel"
                             Visibility="Collapsed"
                             Margin="0,22,0,0"

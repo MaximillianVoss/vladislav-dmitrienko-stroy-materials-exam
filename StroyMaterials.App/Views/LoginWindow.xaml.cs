@@ -28,6 +28,19 @@ public partial class LoginWindow : Window
         OpenMainWindow(UserSession.Guest);
     }
 
+    private void RegisterButton_Click(object sender, RoutedEventArgs e)
+    {
+        var window = new RegisterWindow
+        {
+            Owner = this
+        };
+
+        if (window.ShowDialog() == true && window.RegisteredSession is not null)
+        {
+            OpenMainWindow(window.RegisteredSession);
+        }
+    }
+
     private void PasswordBox_KeyDown(object sender, KeyEventArgs e)
     {
         if (e.Key == Key.Enter)

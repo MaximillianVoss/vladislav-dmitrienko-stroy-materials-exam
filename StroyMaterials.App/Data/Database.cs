@@ -14,7 +14,7 @@ internal static class Database
             SELECT users.id, users.full_name, roles.name
             FROM users
             JOIN roles ON roles.id = users.role_id
-            WHERE users.login = $login AND users.password = $password;
+            WHERE LOWER(users.login) = LOWER($login) AND users.password = $password;
             """;
         command.Parameters.AddWithValue("$login", login);
         command.Parameters.AddWithValue("$password", password);
@@ -30,6 +30,70 @@ internal static class Database
             UserId = reader.GetInt32(0),
             FullName = reader.GetString(1),
             RoleName = reader.GetString(2)
+        };
+    }
+
+    public static UserSession RegisterCustomer(string fullName, string login, string password)
+    {
+        using var connection = OpenConnection();
+        using var transaction = connection.BeginTransaction();
+
+        using (var roleCommand = connection.CreateCommand())
+        {
+            roleCommand.Transaction = transaction;
+            roleCommand.CommandText = "INSERT OR IGNORE INTO roles (name) VALUES ('Авторизованный клиент');";
+            roleCommand.ExecuteNonQuery();
+        }
+
+        var normalizedLogin = login.Trim().ToLowerInvariant();
+        using (var duplicateCommand = connection.CreateCommand())
+        {
+            duplicateCommand.Transaction = transaction;
+            duplicateCommand.CommandText = "SELECT COUNT(*) FROM users WHERE LOWER(login) = $login;";
+            duplicateCommand.Parameters.AddWithValue("$login", normalizedLogin);
+            if (Convert.ToInt32(duplicateCommand.ExecuteScalar()) > 0)
+            {
+                throw new InvalidOperationException("Пользователь с таким логином уже существует.");
+            }
+        }
+
+        int roleId;
+        using (var roleCommand = connection.CreateCommand())
+        {
+            roleCommand.Transaction = transaction;
+            roleCommand.CommandText = "SELECT id FROM roles WHERE name = 'Авторизованный клиент';";
+            roleId = Convert.ToInt32(roleCommand.ExecuteScalar());
+        }
+
+        int userId;
+        using (var command = connection.CreateCommand())
+        {
+            command.Transaction = transaction;
+            command.CommandText = """
+                INSERT INTO users (role_id, full_name, login, password)
+                VALUES ($role_id, $full_name, $login, $password);
+                """;
+            command.Parameters.AddWithValue("$role_id", roleId);
+            command.Parameters.AddWithValue("$full_name", fullName.Trim());
+            command.Parameters.AddWithValue("$login", normalizedLogin);
+            command.Parameters.AddWithValue("$password", password);
+            command.ExecuteNonQuery();
+        }
+
+        using (var idCommand = connection.CreateCommand())
+        {
+            idCommand.Transaction = transaction;
+            idCommand.CommandText = "SELECT last_insert_rowid();";
+            userId = Convert.ToInt32(idCommand.ExecuteScalar());
+        }
+
+        transaction.Commit();
+
+        return new UserSession
+        {
+            UserId = userId,
+            FullName = fullName.Trim(),
+            RoleName = "Авторизованный клиент"
         };
     }
 
