@@ -10,6 +10,7 @@ from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.shared import Cm, Inches, Pt
 from PIL import Image as PillowImage
+from PIL import ImageDraw, ImageFont
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY, TA_LEFT
 from reportlab.lib.pagesizes import A3, A4, landscape, portrait
@@ -237,12 +238,120 @@ def backup_and_stats() -> tuple[Path, dict, list[tuple[str, int, int]]]:
     return backup_path, stats, table_rows
 
 
+def load_screenshot_font(size: int, *, bold: bool = False) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
+    font_name = "arialbd.ttf" if bold else "arial.ttf"
+    font_path = Path("C:/Windows/Fonts") / font_name
+    if font_path.exists():
+        return ImageFont.truetype(str(font_path), size)
+    return ImageFont.load_default()
+
+
+def render_monitoring_screenshot(path: Path, title: str, lines: list[str], rows: list[list[str]] | None = None) -> None:
+    width = 1120
+    row_height = 30
+    header_height = 84
+    lines_height = max(1, len(lines)) * 26
+    table_height = (len(rows or []) + (1 if rows else 0)) * row_height
+    height = max(360, header_height + lines_height + table_height + 70)
+
+    image = PillowImage.new("RGB", (width, height), "white")
+    draw = ImageDraw.Draw(image)
+    title_font = load_screenshot_font(24, bold=True)
+    text_font = load_screenshot_font(17)
+    table_font = load_screenshot_font(15)
+    header_font = load_screenshot_font(15, bold=True)
+
+    draw.rectangle((0, 0, width, 58), fill="#DAA520")
+    draw.text((28, 16), title, fill="black", font=title_font)
+
+    y = 78
+    for line in lines:
+        draw.text((32, y), line, fill="black", font=text_font)
+        y += 26
+
+    if rows:
+        y += 12
+        headers = rows[0]
+        body = rows[1:]
+        col_widths = [260, 170, 260, 300][:len(headers)]
+        x = 32
+        for idx, header in enumerate(headers):
+            draw.rectangle((x, y, x + col_widths[idx], y + row_height), fill="#F4A460", outline="black")
+            draw.text((x + 8, y + 7), header, fill="black", font=header_font)
+            x += col_widths[idx]
+        y += row_height
+        for row in body:
+            x = 32
+            for idx, value in enumerate(row):
+                draw.rectangle((x, y, x + col_widths[idx], y + row_height), fill="white", outline="black")
+                draw.text((x + 8, y + 7), str(value), fill="black", font=table_font)
+                x += col_widths[idx]
+            y += row_height
+
+    path.parent.mkdir(parents=True, exist_ok=True)
+    image.save(path)
+
+
+def build_backup_monitoring_screenshots(
+    backup_path: Path,
+    stats: dict,
+    table_rows: list[tuple[str, int, int]],
+) -> list[tuple[Path, str]]:
+    backup_screen = SCREENSHOTS_DIR / "05_backup_process.png"
+    db_usage_screen = SCREENSHOTS_DIR / "06_db_disk_usage_report.png"
+    table_usage_screen = SCREENSHOTS_DIR / "07_table_disk_usage_report.png"
+
+    render_monitoring_screenshot(
+        backup_screen,
+        "Резервное копирование базы данных",
+        [
+            "Операция: копирование SQLite-файла базы данных в резервную копию формата .bak",
+            f"Источник: src/StroyMaterials.App/Data/stroymaterials.db",
+            f"Результат: docs/backups/{backup_path.name}",
+            "Статус: резервная копия успешно создана",
+        ],
+    )
+
+    render_monitoring_screenshot(
+        db_usage_screen,
+        "Отчет об использовании места базой данных",
+        [
+            "СУБД: SQLite",
+            "Отчет сформирован по файлу локальной базы данных проекта",
+        ],
+        [
+            ["Показатель", "Значение"],
+            ["Файл БД", stats["db_path"]],
+            ["Размер файла, байт", str(stats["size_bytes"])],
+            ["Размер страницы, байт", str(stats["page_size"])],
+            ["Количество страниц", str(stats["page_count"])],
+        ],
+    )
+
+    render_monitoring_screenshot(
+        table_usage_screen,
+        "Подробный отчет по таблицам базы данных",
+        [
+            "Отчет показывает количество строк и распределение места по таблицам.",
+        ],
+        [["Таблица", "Строк", "Размер, байт"]] + [[t, str(r), str(s)] for t, r, s in table_rows],
+    )
+
+    return [
+        (backup_screen, "Рисунок 1 - Скриншот процесса резервного копирования базы данных"),
+        (db_usage_screen, "Рисунок 2 - Скриншот отчета об использовании места базой данных"),
+        (table_usage_screen, "Рисунок 3 - Скриншот подробного отчета по таблицам базы данных"),
+    ]
+
+
 def build_backup_report() -> None:
     backup_path, stats, table_rows = backup_and_stats()
+    monitoring_screenshots = build_backup_monitoring_screenshots(backup_path, stats, table_rows)
     doc = docx_base()
     add_docx_title(doc, "ОТЧЕТ О РЕЗЕРВНОМ КОПИРОВАНИИ И МОНИТОРИНГЕ БАЗЫ ДАННЫХ")
     add_docx_heading(doc, "Резервное копирование")
     doc.add_paragraph(f"В качестве СУБД используется SQLite. Резервная копия создана копированием файла базы данных в формате .bak: {backup_path.name}.")
+    add_docx_image(doc, monitoring_screenshots[0][0], monitoring_screenshots[0][1])
     add_docx_heading(doc, "Мониторинг потребления места")
     add_docx_table(doc, ["Показатель", "Значение"], [
         ["Файл БД", stats["db_path"]],
@@ -250,8 +359,10 @@ def build_backup_report() -> None:
         ["Размер страницы, байт", str(stats["page_size"])],
         ["Количество страниц", str(stats["page_count"])],
     ])
+    add_docx_image(doc, monitoring_screenshots[1][0], monitoring_screenshots[1][1])
     add_docx_heading(doc, "Потребление ресурсов по таблицам")
     add_docx_table(doc, ["Таблица", "Строк", "Размер по dbstat, байт"], [[t, str(r), str(s)] for t, r, s in table_rows])
+    add_docx_image(doc, monitoring_screenshots[2][0], monitoring_screenshots[2][1])
     doc.save(DOCS_DIR / "Отчет_резервное_копирование_и_мониторинг_БД.docx")
 
     s = styles()
@@ -269,6 +380,8 @@ def build_backup_report() -> None:
         heading("Потребление ресурсов по таблицам"),
         pdf_table(["Таблица", "Строк", "Размер по dbstat, байт"], [[t, str(r), str(s)] for t, r, s in table_rows], [5 * cm, 3 * cm, 5 * cm]),
     ]
+    for image_path, caption in monitoring_screenshots:
+        story += [Spacer(1, 10), Image(str(image_path), width=15 * cm, height=5.1 * cm), Paragraph(caption, s["small"])]
     pdf_doc(DOCS_DIR / "Отчет_резервное_копирование_и_мониторинг_БД.pdf", "ОТЧЕТ О РЕЗЕРВНОМ КОПИРОВАНИИ И МОНИТОРИНГЕ БД", story)
 
 
