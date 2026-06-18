@@ -1,0 +1,5 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/StroyMaterials.App/StroyMaterials.App.csproj" />
+  </Folder>
+</Solution>
