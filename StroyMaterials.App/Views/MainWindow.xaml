@@ -10,7 +10,7 @@
     <Window.Resources>
         <Style TargetType="{x:Type DataGridRow}">
             <Setter Property="Background" Value="{Binding RowBackground}" />
-            <Setter Property="MinHeight" Value="74" />
+            <Setter Property="MinHeight" Value="92" />
             <Setter Property="SnapsToDevicePixels" Value="True" />
         </Style>
     </Window.Resources>
@@ -132,19 +132,20 @@
                   Margin="14"
                   MouseDoubleClick="ProductsGrid_MouseDoubleClick">
             <DataGrid.Columns>
-                <DataGridTemplateColumn Header="Фото" Width="78">
+                <DataGridTemplateColumn Header="Фото" Width="106">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <Border Width="62"
-                                    Height="50"
-                                    Background="White"
+                            <Border Width="84"
+                                    Height="64"
+                                    Background="#FEFCF8"
                                     BorderBrush="{StaticResource BorderBrushSoft}"
                                     BorderThickness="1"
-                                    CornerRadius="4"
+                                    CornerRadius="6"
                                     HorizontalAlignment="Center">
                                 <Image Source="{Binding Image}"
                                        Stretch="Uniform"
-                                       Margin="3" />
+                                       RenderOptions.BitmapScalingMode="HighQuality"
+                                       Margin="5" />
                             </Border>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>

@@ -29,7 +29,7 @@ internal static class ImageTools
         var targetPath = Path.Combine(AppPaths.ProductImagesDirectory, fileName);
 
         var source = LoadBitmap(sourcePath, 600);
-        var resized = RenderImage(source, 300, 200);
+        var resized = RenderImage(source, 360, 260);
         var encoder = new PngBitmapEncoder();
         encoder.Frames.Add(BitmapFrame.Create(resized));
         using var stream = File.Create(targetPath);

@@ -8,7 +8,7 @@ internal sealed class ProductRowView
     public ProductRowView(ProductRecord product)
     {
         Product = product;
-        Image = ImageTools.LoadProductImage(product.ImagePath, 132);
+        Image = ImageTools.LoadProductImage(product.ImagePath, 220);
     }
 
     public ProductRecord Product { get; }
